@@ -1,10 +1,12 @@
 {
   "name": "article-service",
-  "version": "0.1",
+  "version": "0.0.1",
   "description": "REST API for articles",
   "author": "Tom Riley <mail@thomasriley.ca>",
   "main": "server.js",
   "scripts": {
+    "format": "npx prettier --write .",
+    "lint": "npx eslint .",
     "start": "node server.js"
   },
   "dependencies": {
