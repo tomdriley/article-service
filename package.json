@@ -5,6 +5,8 @@
   "author": "Tom Riley <mail@thomasriley.ca>",
   "main": "server.js",
   "scripts": {
+    "format": "npx prettier --write .",
+    "lint": "npx eslint .",
     "start": "node server.js"
   },
   "dependencies": {
