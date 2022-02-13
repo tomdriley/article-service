@@ -1,31 +1,50 @@
 import { Article, ArticleTitleDate } from "../article-schemas";
+import DatabaseService from "./database-service";
+import { Db, SortDirection } from "mongodb";
+import { getEnv } from "../utils";
 
 const ArticleService = {
   async getArticleList(): Promise<ArticleTitleDate[]> {
-    return [
-      {
-        name: "2021-01-29-meaning",
-        title: "Meaning",
-        date: "2021-01-29",
-      },
-      {
-        title: "Finding Happiness",
-        date: "2021-01-30",
-        name: "2021-01-30-finding-happiness",
-      },
-    ];
+    const articles = await DatabaseService.withDB(async (database: Db) => {
+      const articles_collection = database.collection(
+        getEnv("MONGO_ARTICLES_COLLECTION")
+      );
+
+      const allArticlesQuery = {};
+      const getNameAndTitle = {
+        _id: false,
+        name: true,
+        title: true,
+        date: true,
+      };
+      const reverseChronological: { date: SortDirection } = { date: -1 };
+
+      const articles = await articles_collection
+        .find(allArticlesQuery)
+        .project<ArticleTitleDate>(getNameAndTitle)
+        .sort(reverseChronological)
+        .toArray();
+
+      return articles;
+    });
+
+    return articles;
   },
-  async getArticle(name: string): Promise<Article | undefined> {
-    return {
-      title: "Meaning",
-      author: "Tom Riley",
-      date: "2021-01-29",
-      categories: ["Positive Psychology"],
-      tags: ["Positive Psychology", "PSYCH 226R"],
-      name: "2021-01-29-meaning",
-      content_type: "markdown",
-      content: "# Article content",
-    };
+  async getArticle(name: string): Promise<Article | null> {
+    const article = await DatabaseService.withDB(async (database: Db) => {
+      const articles_collection = database.collection(
+        getEnv("MONGO_ARTICLES_COLLECTION")
+      );
+
+      const article = await articles_collection.findOne<Article>(
+        { name },
+        { projection: { _id: false } }
+      );
+
+      return article;
+    });
+
+    return article;
   },
 } as const;
 
